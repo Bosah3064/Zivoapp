@@ -25,3 +25,12 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Binaries & CLI tools
+firebase.exe
+*.exe
+
+# OneDrive sync conflict copies
+*-LAMETECHDIGITAL*
+
+

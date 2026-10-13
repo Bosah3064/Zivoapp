@@ -10,12 +10,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // https://console.firebase.google.com -> Project Settings -> General -> Web App
 // ============================================================================
 export const firebaseConfig = {
-  apiKey: "AIzaSyYOUR_FIREBASE_API_KEY_HERE",
-  authDomain: "zivo-dating-app.firebaseapp.com",
-  projectId: "zivo-dating-app",
-  storageBucket: "zivo-dating-app.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abcdef1234567890"
+  apiKey: "AIzaSyB_0UXOS4fsaOvuOoOF0bLlpu12P_XW9s0",
+  authDomain: "zivoapp-92405.firebaseapp.com",
+  projectId: "zivoapp-92405",
+  storageBucket: "zivoapp-92405.firebasestorage.app",
+  messagingSenderId: "753160725796",
+  appId: "1:753160725796:android:d83e3464188ed85b7f3fb1"
 };
 
 // ============================================================================

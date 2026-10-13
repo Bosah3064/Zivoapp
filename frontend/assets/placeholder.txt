@@ -1,1 +1,1 @@
-Zivo Dating Assets
+Place your app icon (icon.png) and splash screen (splash.png) in this folder.

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "753160725796",
+    "project_id": "zivoapp-92405",
+    "storage_bucket": "zivoapp-92405.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:753160725796:android:d83e3464188ed85b7f3fb1",
+        "android_client_info": {
+          "package_name": "com.zivo.dating"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_0UXOS4fsaOvuOoOF0bLlpu12P_XW9s0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

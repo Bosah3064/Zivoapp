@@ -2,38 +2,41 @@
   "expo": {
     "name": "Zivo",
     "slug": "zivo-dating",
-    "scheme": "zivo",
     "version": "1.0.0",
     "orientation": "portrait",
+    "scheme": "zivo",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#090B10"
+      "backgroundColor": "#0f172a"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.zivo.dating",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "bundleIdentifier": "com.humbleboy.zivo"
     },
     "android": {
-      "package": "com.zivo.dating",
-      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#090B10"
+        "backgroundColor": "#0f172a"
       },
-      "permissions": [
-        "CAMERA",
-        "RECORD_AUDIO",
-        "INTERNET",
-        "ACCESS_NETWORK_STATE"
-      ]
+      "package": "com.humbleboy.zivo"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-av",
+      "expo-web-browser"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "86c47605-4f46-4e5a-8b1b-1f868c92b234"
+      }
     }
   }
 }
