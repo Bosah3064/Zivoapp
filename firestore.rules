@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Profiles Collection
+    match /profiles/{userId} {
+      // Anyone logged in can browse profiles to match
+      allow read: if isAuthenticated();
+      // Only the profile owner can edit their own profile
+      allow write: if isOwner(userId);
+    }
+
+    // Swipes Collection
+    match /swipes/{swipeId} {
+      allow read: if isAuthenticated() && request.auth.uid == resource.data.swiper_id;
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.swiper_id;
+    }
+
+    // Matches Collection
+    match /matches/{matchId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.user_1 || 
+        request.auth.uid == resource.data.user_2
+      );
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        request.auth.uid == resource.data.user_1 || 
+        request.auth.uid == resource.data.user_2
+      );
+    }
+
+    // Messages Collection
+    match /messages/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.sender_id;
+    }
+
+    // Transactions Collection
+    match /transactions/{txId} {
+      allow read: if isAuthenticated() && request.auth.uid == resource.data.user_id;
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.user_id;
+    }
+
+    // Safety Reports
+    match /safety_reports/{reportId} {
+      allow create: if isAuthenticated();
+      allow read: if isAuthenticated();
+    }
+
+    // Global Settings
+    match /settings/{settingKey} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+  }
+}
