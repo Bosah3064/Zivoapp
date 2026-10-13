@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { authService, dbService } from '../lib/firebase';
 import { COLORS, SHADOWS } from '../theme';
-import { Search, MessageSquare, Video as VideoIcon, Sparkles, Heart } from 'lucide-react-native';
+import { Search, Video as VideoIcon, Sparkles, Heart, Flame } from 'lucide-react-native';
 
 export default function MatchesScreen({ navigation }) {
   const [matches, setMatches] = useState([]);
@@ -47,7 +47,7 @@ export default function MatchesScreen({ navigation }) {
     return name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  const renderNewMatchItem = ({ item }) => {
+  const renderNewMatchStory = ({ item }) => {
     const user = item.matched_user;
     if (!user) return null;
 
@@ -63,7 +63,7 @@ export default function MatchesScreen({ navigation }) {
         }
         activeOpacity={0.8}
       >
-        <View style={styles.storyRing}>
+        <View style={styles.storyGradientRing}>
           <Image
             source={{
               uri:
@@ -120,7 +120,7 @@ export default function MatchesScreen({ navigation }) {
             ) : null}
           </View>
           <Text style={styles.lastMessage} numberOfLines={1}>
-            {item.last_message || 'New match! Tap to start chatting ✨'}
+            {item.last_message || 'New match! Say hello 👋'}
           </Text>
         </View>
 
@@ -144,9 +144,12 @@ export default function MatchesScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Matches</Text>
+        <View style={styles.headerTitleRow}>
+          <Flame color={COLORS.primary} size={26} fill={COLORS.primary} />
+          <Text style={styles.title}>Matches</Text>
+        </View>
         <View style={styles.countBadge}>
-          <Text style={styles.countText}>{matches.length} Connections</Text>
+          <Text style={styles.countText}>{matches.length} Mutual</Text>
         </View>
       </View>
 
@@ -155,7 +158,7 @@ export default function MatchesScreen({ navigation }) {
         <Search color={COLORS.textMuted} size={18} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search matches..."
+          placeholder="Search matches by name..."
           placeholderTextColor={COLORS.inputPlaceholder}
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -169,18 +172,18 @@ export default function MatchesScreen({ navigation }) {
       ) : matches.length === 0 ? (
         <View style={styles.emptyState}>
           <View style={styles.emptyIconCircle}>
-            <Heart color={COLORS.secondary} size={44} fill={COLORS.secondary} />
+            <Heart color={COLORS.primary} size={44} fill={COLORS.primary} />
           </View>
           <Text style={styles.emptyTitle}>No Matches Yet</Text>
           <Text style={styles.emptySub}>
-            Swipe right on profiles you like. When they like you back, they will appear right here!
+            Start swiping! When someone likes you back, their profile and chat appear right here.
           </Text>
           <TouchableOpacity
-            style={styles.discoverBtn}
+            style={[styles.discoverBtn, SHADOWS.glowCoral]}
             onPress={() => navigation.navigate('Swipe')}
             activeOpacity={0.8}
           >
-            <Text style={styles.discoverBtnText}>Start Discovering</Text>
+            <Text style={styles.discoverBtnText}>Explore Profiles</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -192,16 +195,16 @@ export default function MatchesScreen({ navigation }) {
           ListHeaderComponent={
             matches.length > 0 ? (
               <View style={styles.storiesContainer}>
-                <Text style={styles.sectionHeader}>New Matches</Text>
+                <Text style={styles.sectionHeader}>New Connections</Text>
                 <FlatList
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   data={matches}
                   keyExtractor={(item) => 'story_' + item.id}
-                  renderItem={renderNewMatchItem}
+                  renderItem={renderNewMatchStory}
                   contentContainerStyle={styles.storiesList}
                 />
-                <Text style={styles.sectionHeader}>All Conversations</Text>
+                <Text style={styles.sectionHeader}>Messages</Text>
               </View>
             ) : null
           }
@@ -224,6 +227,11 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 12,
   },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   title: {
     fontSize: 28,
     fontWeight: '900',
@@ -231,23 +239,23 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   countBadge: {
-    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    backgroundColor: 'rgba(255, 78, 100, 0.15)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.3)',
+    borderColor: 'rgba(255, 78, 100, 0.3)',
   },
   countText: {
     color: COLORS.primaryLight,
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   searchWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.surface,
-    borderRadius: 16,
+    borderRadius: 18,
     marginHorizontal: 20,
     marginBottom: 16,
     paddingHorizontal: 16,
@@ -265,10 +273,10 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   storiesContainer: {
-    marginBottom: 12,
+    marginBottom: 14,
   },
   sectionHeader: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
     color: COLORS.textMuted,
     textTransform: 'uppercase',
@@ -283,20 +291,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: 68,
   },
-  storyRing: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+  storyGradientRing: {
+    width: 66,
+    height: 66,
+    borderRadius: 33,
     borderWidth: 2.5,
     borderColor: COLORS.primary,
     padding: 2,
     justifyContent: 'center',
     alignItems: 'center',
+    ...SHADOWS.glowCoral,
   },
   storyAvatar: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
   },
   onlineBadge: {
     position: 'absolute',
@@ -312,19 +321,19 @@ const styles = StyleSheet.create({
   storyName: {
     color: COLORS.textPrimary,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
     marginTop: 6,
     textAlign: 'center',
   },
   listContent: {
     paddingHorizontal: 20,
-    paddingBottom: 24,
+    paddingBottom: 28,
   },
   matchCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.surface,
-    borderRadius: 20,
+    borderRadius: 22,
     padding: 14,
     marginBottom: 12,
     borderWidth: 1,
@@ -368,8 +377,8 @@ const styles = StyleSheet.create({
   scorePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 6,
+    backgroundColor: COLORS.secondary,
+    paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 10,
     gap: 3,
@@ -410,7 +419,7 @@ const styles = StyleSheet.create({
     width: 88,
     height: 88,
     borderRadius: 44,
-    backgroundColor: 'rgba(236, 72, 153, 0.12)',
+    backgroundColor: 'rgba(255, 78, 100, 0.12)',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
@@ -418,7 +427,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     color: COLORS.textPrimary,
     fontSize: 22,
-    fontWeight: '800',
+    fontWeight: '900',
     textAlign: 'center',
   },
   emptySub: {
@@ -430,15 +439,14 @@ const styles = StyleSheet.create({
   },
   discoverBtn: {
     backgroundColor: COLORS.primary,
-    paddingHorizontal: 26,
+    paddingHorizontal: 28,
     paddingVertical: 14,
     borderRadius: 24,
     marginTop: 24,
-    ...SHADOWS.glowPrimary,
   },
   discoverBtnText: {
     color: '#FFFFFF',
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '800',
   },
 });

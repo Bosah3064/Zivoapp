@@ -7,14 +7,19 @@ import {
   ActivityIndicator,
   Alert,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 import { authService, dbService } from '../lib/firebase';
 import { COLORS, SHADOWS } from '../theme';
 import MatchCard from '../components/MatchCard';
-import { Compass, RotateCcw, Coins, Sparkles } from 'lucide-react-native';
+import { Compass, RotateCcw, Coins, Sparkles, Flame, Sliders } from 'lucide-react-native';
+
+const FILTER_TAGS = ['All', 'Dating', 'Friendship', 'Networking'];
 
 export default function HomeScreen({ navigation }) {
   const [profiles, setProfiles] = useState([]);
+  const [filteredProfiles, setFilteredProfiles] = useState([]);
+  const [activeFilter, setActiveFilter] = useState('All');
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userCoins, setUserCoins] = useState(100);
@@ -23,6 +28,17 @@ export default function HomeScreen({ navigation }) {
   useEffect(() => {
     loadUserDataAndProfiles();
   }, []);
+
+  useEffect(() => {
+    if (activeFilter === 'All') {
+      setFilteredProfiles(profiles);
+    } else {
+      setFilteredProfiles(
+        profiles.filter((p) => p.intent?.toLowerCase() === activeFilter.toLowerCase())
+      );
+    }
+    setCurrentIndex(0);
+  }, [activeFilter, profiles]);
 
   const loadUserDataAndProfiles = async () => {
     try {
@@ -36,10 +52,10 @@ export default function HomeScreen({ navigation }) {
 
         const recommended = await dbService.getRecommendedMatches(user.id);
         setProfiles(recommended);
+        setFilteredProfiles(recommended);
       }
     } catch (error) {
       console.error('Error fetching profiles:', error);
-      Alert.alert('Notice', 'Unable to load candidates. Showing demo profiles.');
     } finally {
       setLoading(false);
     }
@@ -57,12 +73,12 @@ export default function HomeScreen({ navigation }) {
       if (isMatch) {
         const matchedName = match?.matched_user?.full_name || 'your match';
         Alert.alert(
-          "It's a Match! 🎉",
-          `You and ${matchedName} liked each other! Start a conversation or video call now.`,
+          type === 'superlike' ? "Super Match! ⭐" : "It's a Match! 🎉",
+          `You and ${matchedName} connected! Start a conversation or jump into video chat.`,
           [
             { text: 'Keep Swiping', style: 'cancel' },
             {
-              text: 'Send Message',
+              text: 'Open Chat',
               onPress: () =>
                 navigation.navigate('Chat', {
                   matchId: match?.id,
@@ -87,23 +103,22 @@ export default function HomeScreen({ navigation }) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Finding best matches for you...</Text>
+        <Text style={styles.loadingText}>Connecting to community...</Text>
       </View>
     );
   }
 
-  const currentProfile = profiles[currentIndex];
+  const currentProfile = filteredProfiles[currentIndex];
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Top Header */}
+      {/* Top Social Header */}
       <View style={styles.header}>
         <View style={styles.brandRow}>
-          <Text style={styles.brandTitle}>Zivo</Text>
-          <View style={styles.liveIndicator}>
-            <View style={styles.liveDot} />
-            <Text style={styles.liveText}>DISCOVER</Text>
+          <View style={styles.flameCircle}>
+            <Flame color="#FFFFFF" size={20} fill="#FFFFFF" />
           </View>
+          <Text style={styles.brandTitle}>Zivo</Text>
         </View>
 
         <TouchableOpacity
@@ -116,33 +131,52 @@ export default function HomeScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Main Swiper Canvas */}
+      {/* Filter Tabs Bar (Dating, Friendship, Networking) */}
+      <View style={styles.filtersWrapper}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersScroll}>
+          {FILTER_TAGS.map((tag) => (
+            <TouchableOpacity
+              key={tag}
+              style={[styles.filterChip, activeFilter === tag && styles.filterChipActive]}
+              onPress={() => setActiveFilter(tag)}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.filterChipText, activeFilter === tag && styles.filterChipTextActive]}>
+                {tag}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Card Arena */}
       <View style={styles.cardContainer}>
         {currentProfile ? (
           <MatchCard
             profile={currentProfile}
             onLike={() => handleSwipe('like', currentProfile.user_id)}
             onPass={() => handleSwipe('dislike', currentProfile.user_id)}
+            onSuperLike={() => handleSwipe('superlike', currentProfile.user_id)}
             onInfo={() => {
               Alert.alert(
                 currentProfile.full_name,
-                `Intent: ${currentProfile.intent}\n\nBio: ${currentProfile.bio || 'No bio yet'}`
+                `Intent: ${currentProfile.intent}\n\nInterests: ${(currentProfile.interests || []).join(', ')}\n\nBio: ${currentProfile.bio || 'No bio yet'}`
               );
             }}
           />
         ) : (
           <View style={styles.emptyCard}>
             <View style={styles.emptyIconCircle}>
-              <Compass color={COLORS.primary} size={48} />
+              <Compass color={COLORS.primary} size={46} />
             </View>
-            <Text style={styles.emptyTitle}>All Caught Up! 🌍</Text>
+            <Text style={styles.emptyTitle}>You're All Caught Up!</Text>
             <Text style={styles.emptySub}>
-              You've reviewed all active profiles in your area for now.
+              No more profiles found matching "{activeFilter}". Expand your filters or explore other categories.
             </Text>
 
             <TouchableOpacity style={styles.refreshBtn} onPress={resetProfiles} activeOpacity={0.8}>
               <RotateCcw color="#FFFFFF" size={18} />
-              <Text style={styles.refreshBtnText}>Reset & Discover Again</Text>
+              <Text style={styles.refreshBtnText}>Refresh Feed</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -168,43 +202,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
+  flameCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...SHADOWS.glowCoral,
+  },
   brandTitle: {
     fontSize: 28,
     fontWeight: '900',
-    color: COLORS.primary,
+    color: '#FFFFFF',
     letterSpacing: -0.5,
-  },
-  liveIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(139, 92, 246, 0.15)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 5,
-  },
-  liveDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: COLORS.primary,
-  },
-  liveText: {
-    color: COLORS.primaryLight,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.5,
   },
   coinBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.surfaceElevated,
+    backgroundColor: COLORS.surface,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 22,
     gap: 6,
     borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.3)',
+    borderColor: 'rgba(255, 184, 0, 0.4)',
     ...SHADOWS.sm,
   },
   coinText: {
@@ -212,11 +234,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
   },
+  filtersWrapper: {
+    paddingBottom: 10,
+  },
+  filtersScroll: {
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  filterChipActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+    ...SHADOWS.glowCoral,
+  },
+  filterChipText: {
+    color: COLORS.textMuted,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  filterChipTextActive: {
+    color: '#FFFFFF',
+  },
   cardContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: 16,
+    paddingBottom: 12,
   },
   centered: {
     flex: 1,
@@ -233,19 +283,19 @@ const styles = StyleSheet.create({
   },
   emptyCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: 28,
+    borderRadius: 30,
     padding: 32,
     alignItems: 'center',
     width: '88%',
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderLight,
     ...SHADOWS.md,
   },
   emptyIconCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: 'rgba(139, 92, 246, 0.12)',
+    width: 86,
+    height: 86,
+    borderRadius: 43,
+    backgroundColor: 'rgba(255, 78, 100, 0.12)',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
@@ -253,7 +303,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     color: COLORS.textPrimary,
     fontSize: 22,
-    fontWeight: '800',
+    fontWeight: '900',
     textAlign: 'center',
   },
   emptySub: {
@@ -267,12 +317,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.primary,
-    paddingHorizontal: 22,
+    paddingHorizontal: 24,
     paddingVertical: 14,
     borderRadius: 24,
     marginTop: 24,
     gap: 8,
-    ...SHADOWS.glowPrimary,
+    ...SHADOWS.glowCoral,
   },
   refreshBtnText: {
     color: '#FFFFFF',

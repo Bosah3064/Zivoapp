@@ -8,7 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { authService } from './src/lib/firebase';
 import { COLORS } from './src/theme';
-import { Heart, MessageCircle, User, Coins } from 'lucide-react-native';
+import { Heart, MessageCircle, User, Coins, Flame } from 'lucide-react-native';
 
 import AuthScreen from './src/screens/AuthScreen';
 import HomeScreen from './src/screens/HomeScreen';
@@ -29,7 +29,7 @@ function MainTabs() {
           backgroundColor: COLORS.background,
           borderTopColor: COLORS.border,
           borderTopWidth: 1,
-          height: 64,
+          height: 66,
           paddingBottom: 10,
           paddingTop: 8,
         },
@@ -37,7 +37,7 @@ function MainTabs() {
         tabBarInactiveTintColor: COLORS.textSubtle,
         tabBarLabelStyle: {
           fontSize: 11,
-          fontWeight: '600',
+          fontWeight: '700',
         },
         headerShown: false,
       }}
@@ -48,7 +48,7 @@ function MainTabs() {
         options={{
           tabBarLabel: 'Discover',
           tabBarIcon: ({ color, focused }) => (
-            <Heart color={color} size={22} fill={focused ? color : 'transparent'} />
+            <Flame color={color} size={24} fill={focused ? color : 'transparent'} />
           ),
         }}
       />
@@ -58,7 +58,7 @@ function MainTabs() {
         options={{
           tabBarLabel: 'Matches',
           tabBarIcon: ({ color, focused }) => (
-            <MessageCircle color={color} size={22} fill={focused ? color : 'transparent'} />
+            <MessageCircle color={color} size={24} fill={focused ? color : 'transparent'} />
           ),
         }}
       />
@@ -68,7 +68,7 @@ function MainTabs() {
         options={{
           tabBarLabel: 'Store',
           tabBarIcon: ({ color, focused }) => (
-            <Coins color={color} size={22} />
+            <Coins color={color} size={24} />
           ),
         }}
       />
@@ -78,7 +78,7 @@ function MainTabs() {
         options={{
           tabBarLabel: 'Profile',
           tabBarIcon: ({ color, focused }) => (
-            <User color={color} size={22} />
+            <User color={color} size={24} />
           ),
         }}
       />

@@ -10,10 +10,18 @@ import {
   Platform,
   Alert,
   SafeAreaView,
+  ScrollView,
 } from 'react-native';
 import { authService, dbService } from '../lib/firebase';
 import { COLORS, SHADOWS } from '../theme';
-import { Send, Camera, ArrowLeft, Sparkles } from 'lucide-react-native';
+import { Send, Camera, ArrowLeft, Sparkles, Mic, CheckCheck } from 'lucide-react-native';
+
+const QUICK_EMOJIS = ['👋', '🔥', '😍', '☕', '🥂', '✨'];
+const ICEBREAKERS = [
+  'What’s your dream travel destination? ✈️',
+  'Coffee or matcha in the morning? ☕',
+  'What song are you playing on repeat right now? 🎧',
+];
 
 export default function ChatScreen({ route, navigation }) {
   const { matchId, receiverName = 'Match', receiverId, rechargeNeeded } = route.params || {};
@@ -26,7 +34,7 @@ export default function ChatScreen({ route, navigation }) {
     if (rechargeNeeded) {
       Alert.alert(
         'Out of Coins',
-        'Your call ended because you ran out of coins. Recharge now to continue calling!',
+        'Your video call ended because you ran out of coins. Recharge now to continue calling!',
         [
           { text: 'Later', style: 'cancel' },
           { text: 'Recharge', onPress: () => navigation.navigate('CoinStore') },
@@ -59,13 +67,13 @@ export default function ChatScreen({ route, navigation }) {
     }
   };
 
-  const sendMessage = async () => {
-    if (!inputText.trim() || !currentUser || !matchId) return;
+  const sendMessage = async (textToSend) => {
+    const content = (textToSend || inputText).trim();
+    if (!content || !currentUser || !matchId) return;
 
-    const text = inputText.trim();
-    setInputText('');
+    if (!textToSend) setInputText('');
 
-    const newMsg = await dbService.sendMessage(matchId, currentUser.id, text, 'text');
+    const newMsg = await dbService.sendMessage(matchId, currentUser.id, content, 'text');
     setMessages((prev) => {
       if (prev.some((m) => m.id === newMsg.id)) return prev;
       return [...prev, newMsg];
@@ -79,6 +87,12 @@ export default function ChatScreen({ route, navigation }) {
         <Text style={[styles.messageText, isMe ? styles.myText : styles.theirText]}>
           {item.content}
         </Text>
+        <View style={styles.bubbleFooter}>
+          <Text style={[styles.timeText, isMe ? styles.myTime : styles.theirTime]}>
+            {new Date(item.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </Text>
+          {isMe && <CheckCheck color="rgba(255,255,255,0.7)" size={14} style={{ marginLeft: 4 }} />}
+        </View>
       </View>
     );
   };
@@ -90,7 +104,7 @@ export default function ChatScreen({ route, navigation }) {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
-        {/* Top Chat Header */}
+        {/* Top Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <ArrowLeft color={COLORS.textPrimary} size={24} />
@@ -100,12 +114,12 @@ export default function ChatScreen({ route, navigation }) {
             <Text style={styles.headerTitle}>{receiverName}</Text>
             <View style={styles.statusRow}>
               <View style={styles.onlineDot} />
-              <Text style={styles.headerStatus}>Active now</Text>
+              <Text style={styles.headerStatus}>Online now</Text>
             </View>
           </View>
 
           <TouchableOpacity
-            style={styles.callBtn}
+            style={[styles.callBtn, SHADOWS.glowCoral]}
             onPress={() => navigation.navigate('VideoCall', { matchId, receiverName, receiverId })}
             activeOpacity={0.8}
           >
@@ -116,11 +130,24 @@ export default function ChatScreen({ route, navigation }) {
         {/* Message Stream */}
         {messages.length === 0 ? (
           <View style={styles.emptyChat}>
-            <Sparkles color={COLORS.primary} size={36} />
-            <Text style={styles.emptyChatTitle}>You matched with {receiverName}!</Text>
+            <Sparkles color={COLORS.primary} size={40} />
+            <Text style={styles.emptyChatTitle}>You & {receiverName} Matched!</Text>
             <Text style={styles.emptyChatSub}>
-              Break the ice! Say hello, ask about their favorite travel spot, or start a video call.
+              Break the ice with one of these fun conversation starters:
             </Text>
+
+            <View style={styles.icebreakersList}>
+              {ICEBREAKERS.map((prompt, i) => (
+                <TouchableOpacity
+                  key={i}
+                  style={styles.icebreakerChip}
+                  onPress={() => sendMessage(prompt)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.icebreakerText}>{prompt}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         ) : (
           <FlatList
@@ -133,19 +160,36 @@ export default function ChatScreen({ route, navigation }) {
           />
         )}
 
+        {/* Quick Emoji Reaction Strip */}
+        <View style={styles.emojiBar}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.emojiScroll}>
+            {QUICK_EMOJIS.map((emoji, idx) => (
+              <TouchableOpacity
+                key={idx}
+                style={styles.emojiBtn}
+                onPress={() => sendMessage(emoji)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.emojiText}>{emoji}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
         {/* Input Bar */}
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Type a message..."
+            placeholder={`Message ${receiverName}...`}
             placeholderTextColor={COLORS.inputPlaceholder}
             value={inputText}
             onChangeText={setInputText}
             multiline={false}
           />
+
           <TouchableOpacity
-            style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
-            onPress={sendMessage}
+            style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled, SHADOWS.sm]}
+            onPress={() => sendMessage()}
             disabled={!inputText.trim()}
             activeOpacity={0.85}
           >
@@ -202,16 +246,15 @@ const styles = StyleSheet.create({
   headerStatus: {
     color: COLORS.textMuted,
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   callBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    ...SHADOWS.sm,
   },
   listContent: {
     padding: 16,
@@ -221,7 +264,7 @@ const styles = StyleSheet.create({
     maxWidth: '78%',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 20,
+    borderRadius: 22,
     marginBottom: 10,
     ...SHADOWS.sm,
   },
@@ -232,14 +275,14 @@ const styles = StyleSheet.create({
   },
   theirMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: COLORS.surfaceElevated,
+    backgroundColor: COLORS.surface,
     borderBottomLeftRadius: 4,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderLight,
   },
   messageText: {
     fontSize: 15,
-    lineHeight: 21,
+    lineHeight: 22,
     fontWeight: '500',
   },
   myText: {
@@ -248,25 +291,79 @@ const styles = StyleSheet.create({
   theirText: {
     color: COLORS.textPrimary,
   },
+  bubbleFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+    marginTop: 4,
+  },
+  timeText: {
+    fontSize: 10,
+    fontWeight: '500',
+  },
+  myTime: {
+    color: 'rgba(255,255,255,0.7)',
+  },
+  theirTime: {
+    color: COLORS.textSubtle,
+  },
   emptyChat: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 36,
+    paddingHorizontal: 28,
   },
   emptyChatTitle: {
     color: COLORS.textPrimary,
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
     marginTop: 14,
     textAlign: 'center',
   },
   emptyChatSub: {
     color: COLORS.textSecondary,
-    fontSize: 13,
+    fontSize: 14,
     textAlign: 'center',
     marginTop: 6,
     lineHeight: 20,
+    marginBottom: 20,
+  },
+  icebreakersList: {
+    width: '100%',
+    gap: 10,
+  },
+  icebreakerChip: {
+    backgroundColor: COLORS.surface,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+  },
+  icebreakerText: {
+    color: COLORS.textPrimary,
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  emojiBar: {
+    paddingVertical: 6,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    backgroundColor: COLORS.backgroundSecondary,
+  },
+  emojiScroll: {
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  emojiBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: COLORS.surface,
+  },
+  emojiText: {
+    fontSize: 18,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -296,10 +393,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    ...SHADOWS.sm,
   },
   sendButtonDisabled: {
     backgroundColor: COLORS.surfaceLight,
-    opacity: 0.6,
+    opacity: 0.5,
   },
 });

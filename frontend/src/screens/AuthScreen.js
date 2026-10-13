@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { authService } from '../lib/firebase';
 import { COLORS, SHADOWS } from '../theme';
-import { Heart, Sparkles, Mail, Lock, User as UserIcon } from 'lucide-react-native';
+import { Heart, Sparkles, Mail, Lock, User as UserIcon, Flame } from 'lucide-react-native';
 
 export default function AuthScreen() {
   const [email, setEmail] = useState('');
@@ -39,7 +39,7 @@ export default function AuthScreen() {
       if (isSignUp) {
         const { error } = await authService.signUp(email.trim(), password, fullName.trim());
         if (error) throw new Error(error);
-        Alert.alert('Welcome to Zivo! 🎉', 'Your account has been created successfully.');
+        Alert.alert('Welcome to Zivo! 💫', 'Your account has been created. Start discovering matches!');
       } else {
         const { error } = await authService.signIn(email.trim(), password);
         if (error) throw new Error(error);
@@ -67,7 +67,7 @@ export default function AuthScreen() {
           {/* Brand Logo Header */}
           <View style={styles.brandHeader}>
             <View style={styles.logoBadge}>
-              <Heart color="#FFFFFF" size={42} fill="#FFFFFF" />
+              <Flame color="#FFFFFF" size={48} fill="#FFFFFF" />
             </View>
             <Text style={styles.title}>Zivo</Text>
             <Text style={styles.subtitle}>Smart Video Dating for Humans</Text>
@@ -134,7 +134,7 @@ export default function AuthScreen() {
 
             {/* Submit Button */}
             <TouchableOpacity
-              style={[styles.primaryBtn, SHADOWS.glowPrimary]}
+              style={[styles.primaryBtn, SHADOWS.glowCoral]}
               onPress={handleAuth}
               disabled={loading}
               activeOpacity={0.85}
@@ -143,7 +143,7 @@ export default function AuthScreen() {
                 <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
                 <Text style={styles.primaryBtnText}>
-                  {isSignUp ? 'Get Started Free' : 'Sign In to Zivo'}
+                  {isSignUp ? 'Join Zivo' : 'Sign In'}
                 </Text>
               )}
             </TouchableOpacity>
@@ -156,7 +156,7 @@ export default function AuthScreen() {
           </View>
 
           <Text style={styles.footerText}>
-            By continuing, you agree to our Terms of Service & Privacy Policy.
+            By signing up, you agree to our Terms of Service & Community Guidelines.
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -180,31 +180,31 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   logoBadge: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
-    ...SHADOWS.glowPrimary,
+    ...SHADOWS.glowCoral,
   },
   title: {
-    fontSize: 40,
+    fontSize: 42,
     fontWeight: '900',
-    color: COLORS.textPrimary,
+    color: '#FFFFFF',
     letterSpacing: -1,
   },
   subtitle: {
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: '600',
     color: COLORS.textSecondary,
     marginTop: 6,
   },
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: COLORS.surface,
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 4,
     marginBottom: 20,
     borderWidth: 1,
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   tabButton: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 14,
     alignItems: 'center',
   },
   tabButtonActive: {
@@ -221,16 +221,16 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
     color: COLORS.textMuted,
   },
   tabTextActive: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '800',
   },
   formCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: 24,
+    borderRadius: 26,
     padding: 22,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.inputBackground,
-    borderRadius: 16,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: COLORS.inputBorder,
     paddingHorizontal: 16,
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
   primaryBtnText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   demoBtn: {
     flexDirection: 'row',
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
   demoBtnText: {
     color: COLORS.warning,
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   footerText: {
     color: COLORS.textSubtle,

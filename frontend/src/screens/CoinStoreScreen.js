@@ -10,19 +10,29 @@ import {
 } from 'react-native';
 import { authService, dbService } from '../lib/firebase';
 import { COLORS, SHADOWS } from '../theme';
-import { Coins, Gift, Share2, ArrowLeft, Zap, Sparkles } from 'lucide-react-native';
+import { Coins, Gift, Share2, ArrowLeft, Zap, Sparkles, Flame, Check } from 'lucide-react-native';
 
 const COIN_PACKS = [
   { id: '1', amount: 100, price: '$0.99', extra: '0%', tier: 'Starter', color: '#CD7F32' },
   { id: '2', amount: 550, price: '$4.99', extra: '10%', tier: 'Popular', color: '#CBD5E1' },
   { id: '3', amount: 1200, price: '$9.99', extra: '20%', tier: 'Best Value', color: '#FFD700', popular: true },
-  { id: '4', amount: 3000, price: '$19.99', extra: '50%', tier: 'VIP Gold', color: '#A78BFA' },
+  { id: '4', amount: 3000, price: '$19.99', extra: '50%', tier: 'VIP Gold', color: '#FF7588' },
+];
+
+const STREAK_DAYS = [
+  { day: 1, amount: 50, claimed: true },
+  { day: 2, amount: 75, claimed: false, current: true },
+  { day: 3, amount: 100, claimed: false },
+  { day: 4, amount: 125, claimed: false },
+  { day: 5, amount: 150, claimed: false },
+  { day: 6, amount: 200, claimed: false },
+  { day: 7, amount: 500, claimed: false, bonus: true },
 ];
 
 export default function CoinStoreScreen({ navigation }) {
   const [balance, setBalance] = useState(100);
   const [isClaimed, setIsClaimed] = useState(false);
-  const [flashDiscount, setFlashDiscount] = useState(25);
+  const [flashDiscount, setFlashDiscount] = useState(30);
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -53,7 +63,7 @@ export default function CoinStoreScreen({ navigation }) {
     if (res.success) {
       setBalance(res.newBalance);
       setIsClaimed(true);
-      Alert.alert('Congratulations! 🎉', `You claimed ${res.amount} free coins.`);
+      Alert.alert('Streak Claimed! 🔥', `You received ${res.amount} coins for checking in!`);
     } else {
       Alert.alert('Daily Bonus', res.message);
     }
@@ -61,18 +71,18 @@ export default function CoinStoreScreen({ navigation }) {
 
   const purchaseCoins = async (pack) => {
     Alert.alert(
-      'Confirm Purchase',
-      `Add ${pack.amount} Zivo Coins for ${pack.price}?`,
+      'Confirm Pack Purchase',
+      `Add ${pack.amount} Coins to your wallet for ${pack.price}?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Buy Now',
+          text: 'Confirm',
           onPress: async () => {
             if (currentUser) {
               const newTotal = balance + pack.amount;
               await dbService.updateProfile(currentUser.id, { coins: newTotal });
               setBalance(newTotal);
-              Alert.alert('Success! 🪙', `${pack.amount} Coins have been added to your balance.`);
+              Alert.alert('Wallet Recharged! 🪙', `${pack.amount} Coins successfully added.`);
             }
           },
         },
@@ -86,7 +96,7 @@ export default function CoinStoreScreen({ navigation }) {
       const newTotal = balance + bonus;
       await dbService.updateProfile(currentUser.id, { coins: newTotal });
       setBalance(newTotal);
-      Alert.alert('Bonus Earned! 🎁', `Thanks for sharing Zivo! +${bonus} coins added.`);
+      Alert.alert('Bonus Unlocked! 🎁', `Thanks for inviting your friends! +${bonus} coins added.`);
     }
   };
 
@@ -103,14 +113,14 @@ export default function CoinStoreScreen({ navigation }) {
         {item.popular && (
           <View style={styles.popularBadge}>
             <Sparkles color="#FFFFFF" size={10} />
-            <Text style={styles.popularText}>MOST POPULAR</Text>
+            <Text style={styles.popularText}>POPULAR</Text>
           </View>
         )}
         <View style={[styles.coinIconCircle, { backgroundColor: item.color + '22' }]}>
           <Coins color={item.color} size={36} />
         </View>
 
-        <Text style={styles.packAmount}>{item.amount.toLocaleString()} Coins</Text>
+        <Text style={styles.packAmount}>{item.amount.toLocaleString()}</Text>
         <Text style={styles.packTier}>{item.tier}</Text>
 
         {item.extra !== '0%' && (
@@ -135,7 +145,7 @@ export default function CoinStoreScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      {/* Top Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <ArrowLeft color={COLORS.textPrimary} size={24} />
@@ -152,7 +162,7 @@ export default function CoinStoreScreen({ navigation }) {
         <View style={styles.flashBanner}>
           <Zap color="#FFFFFF" size={16} fill="#FFFFFF" />
           <Text style={styles.flashText}>
-            SPECIAL DEAL: {flashDiscount}% OFF ALL COIN PACKS
+            LIMITED TIME: {flashDiscount}% OFF ALL COIN BUNDLES
           </Text>
         </View>
       )}
@@ -165,53 +175,64 @@ export default function CoinStoreScreen({ navigation }) {
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
           <>
-            {/* Free Rewards Section */}
-            <View style={styles.rewardSection}>
-              <Text style={styles.sectionTitle}>Free Daily Rewards</Text>
+            {/* 7-Day Streak Rewards Tracker */}
+            <View style={styles.streakCard}>
+              <View style={styles.streakHeader}>
+                <View style={styles.streakTitleRow}>
+                  <Flame color={COLORS.warning} size={22} fill={COLORS.warning} />
+                  <Text style={styles.streakTitle}>Daily Login Streak</Text>
+                </View>
+                <Text style={styles.streakCount}>Day 2 / 7</Text>
+              </View>
+
+              <View style={styles.streakDaysRow}>
+                {STREAK_DAYS.map((d) => (
+                  <View
+                    key={d.day}
+                    style={[
+                      styles.streakDayItem,
+                      d.claimed && styles.streakDayClaimed,
+                      d.current && styles.streakDayCurrent,
+                      d.bonus && styles.streakDayBonus,
+                    ]}
+                  >
+                    <Text style={styles.streakDayLabel}>D{d.day}</Text>
+                    {d.claimed ? (
+                      <Check color={COLORS.success} size={14} strokeWidth={3} />
+                    ) : (
+                      <Text style={styles.streakDayCoins}>+{d.amount}</Text>
+                    )}
+                  </View>
+                ))}
+              </View>
 
               <TouchableOpacity
-                style={[styles.rewardCard, isClaimed && styles.disabledReward, SHADOWS.sm]}
+                style={[styles.claimStreakBtn, isClaimed && styles.disabledClaimBtn, SHADOWS.glowGold]}
                 onPress={claimReward}
                 disabled={isClaimed}
                 activeOpacity={0.8}
               >
-                <View style={styles.rewardIconBg}>
-                  <Gift color={isClaimed ? COLORS.textSubtle : COLORS.secondary} size={28} />
-                </View>
-                <View style={styles.rewardInfo}>
-                  <Text style={styles.rewardTitle}>Daily Check-In Bonus</Text>
-                  <Text style={styles.rewardSub}>
-                    {isClaimed ? 'Claimed today • Resets in 24h' : 'Claim your free 50 coins today'}
-                  </Text>
-                </View>
-                {!isClaimed ? (
-                  <View style={styles.claimBadge}>
-                    <Text style={styles.claimText}>+50 FREE</Text>
-                  </View>
-                ) : (
-                  <Text style={styles.claimedLabel}>DONE</Text>
-                )}
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.rewardCard, SHADOWS.sm]}
-                onPress={shareApp}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.rewardIconBg, { backgroundColor: 'rgba(139, 92, 246, 0.15)' }]}>
-                  <Share2 color={COLORS.primaryLight} size={28} />
-                </View>
-                <View style={styles.rewardInfo}>
-                  <Text style={styles.rewardTitle}>Invite & Earn</Text>
-                  <Text style={styles.rewardSub}>Share Zivo to receive 50 bonus coins</Text>
-                </View>
-                <View style={[styles.claimBadge, { backgroundColor: COLORS.primary }]}>
-                  <Text style={styles.claimText}>+50 COINS</Text>
-                </View>
+                <Text style={styles.claimStreakBtnText}>
+                  {isClaimed ? 'Claimed Today (Come back tomorrow)' : 'Claim Day 2 Bonus (+75 Coins)'}
+                </Text>
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.sectionTitle}>Choose a Coin Pack</Text>
+            {/* Invite & Earn Referral Section */}
+            <View style={styles.referralCard}>
+              <View style={styles.referralIcon}>
+                <Share2 color={COLORS.primaryLight} size={26} />
+              </View>
+              <View style={styles.referralInfo}>
+                <Text style={styles.referralTitle}>Invite Friends & Earn</Text>
+                <Text style={styles.referralSub}>Get +50 coins for every friend who joins</Text>
+              </View>
+              <TouchableOpacity style={styles.inviteBtn} onPress={shareApp} activeOpacity={0.8}>
+                <Text style={styles.inviteBtnText}>Invite</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.sectionTitle}>Get More Coins</Text>
           </>
         }
       />
@@ -239,18 +260,18 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: COLORS.textPrimary,
     fontSize: 20,
-    fontWeight: '800',
+    fontWeight: '900',
   },
   balanceBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.surfaceElevated,
+    backgroundColor: COLORS.surface,
     paddingHorizontal: 14,
     paddingVertical: 7,
-    borderRadius: 20,
+    borderRadius: 22,
     gap: 6,
     borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.4)',
+    borderColor: 'rgba(255, 184, 0, 0.4)',
   },
   balanceText: {
     color: COLORS.warning,
@@ -273,77 +294,149 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: 12,
-    paddingBottom: 32,
+    paddingBottom: 36,
   },
-  rewardSection: {
-    paddingHorizontal: 8,
-    paddingTop: 16,
-    marginBottom: 10,
-    gap: 12,
+  streakCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 24,
+    padding: 18,
+    marginHorizontal: 8,
+    marginTop: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 184, 0, 0.3)',
+    ...SHADOWS.sm,
+  },
+  streakHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  streakTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  streakTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  streakCount: {
+    color: COLORS.warning,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  streakDaysRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 6,
+    marginBottom: 16,
+  },
+  streakDayItem: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: COLORS.surfaceLight,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  streakDayClaimed: {
+    borderColor: COLORS.success,
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+  },
+  streakDayCurrent: {
+    borderColor: COLORS.warning,
+    borderWidth: 1.5,
+    backgroundColor: 'rgba(255, 184, 0, 0.15)',
+  },
+  streakDayBonus: {
+    borderColor: COLORS.primary,
+  },
+  streakDayLabel: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  streakDayCoins: {
+    color: COLORS.textPrimary,
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  claimStreakBtn: {
+    backgroundColor: COLORS.warning,
+    paddingVertical: 14,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  disabledClaimBtn: {
+    backgroundColor: COLORS.surfaceLight,
+    opacity: 0.6,
+  },
+  claimStreakBtnText: {
+    color: '#090B10',
+    fontSize: 14,
+    fontWeight: '900',
+  },
+  referralCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    padding: 16,
+    borderRadius: 22,
+    marginHorizontal: 8,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  referralIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 78, 100, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  referralInfo: {
+    flex: 1,
+    marginLeft: 14,
+  },
+  referralTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  referralSub: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    marginTop: 2,
+  },
+  inviteBtn: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 16,
+  },
+  inviteBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 13,
   },
   sectionTitle: {
     color: COLORS.textPrimary,
     fontSize: 17,
     fontWeight: '800',
-    marginLeft: 8,
-    marginTop: 12,
-    marginBottom: 8,
-  },
-  rewardCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    padding: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  disabledReward: {
-    opacity: 0.55,
-  },
-  rewardIconBg: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(236, 72, 153, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  rewardInfo: {
-    flex: 1,
-    marginLeft: 14,
-  },
-  rewardTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  rewardSub: {
-    color: COLORS.textSecondary,
-    fontSize: 12,
-    marginTop: 2,
-  },
-  claimBadge: {
-    backgroundColor: COLORS.secondary,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 14,
-  },
-  claimText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '800',
-  },
-  claimedLabel: {
-    color: COLORS.textSubtle,
-    fontSize: 12,
-    fontWeight: '700',
-    marginRight: 6,
+    marginLeft: 12,
+    marginTop: 8,
+    marginBottom: 10,
   },
   packCard: {
     flex: 1,
     backgroundColor: COLORS.surface,
-    margin: 8,
+    margin: 6,
     padding: 18,
     borderRadius: 24,
     alignItems: 'center',
@@ -374,9 +467,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   coinIconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 62,
+    height: 62,
+    borderRadius: 31,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 6,
@@ -384,8 +477,8 @@ const styles = StyleSheet.create({
   },
   packAmount: {
     color: COLORS.textPrimary,
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: 20,
+    fontWeight: '900',
   },
   packTier: {
     color: COLORS.textMuted,
@@ -410,7 +503,7 @@ const styles = StyleSheet.create({
   priceBtn: {
     backgroundColor: COLORS.surfaceLight,
     marginTop: 14,
-    paddingHorizontal: 20,
+    paddingHorizontal: 18,
     paddingVertical: 10,
     borderRadius: 20,
     width: '100%',

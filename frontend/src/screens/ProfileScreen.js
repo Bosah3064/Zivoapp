@@ -24,6 +24,7 @@ import {
   Settings as SettingsIcon,
   Check,
   X,
+  Flame,
 } from 'lucide-react-native';
 
 export default function ProfileScreen({ navigation }) {
@@ -81,7 +82,7 @@ export default function ProfileScreen({ navigation }) {
       if (updated) {
         setProfile(updated);
         setEditModalVisible(false);
-        Alert.alert('Success', 'Profile updated successfully.');
+        Alert.alert('Profile Saved ✨', 'Your public information has been updated.');
       }
     } catch (e) {
       Alert.alert('Error', 'Unable to update profile. Please try again.');
@@ -91,7 +92,7 @@ export default function ProfileScreen({ navigation }) {
   };
 
   const handleSignOut = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out of Zivo?', [
+    Alert.alert('Sign Out', 'Are you sure you want to log out of Zivo?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Sign Out',
@@ -127,7 +128,7 @@ export default function ProfileScreen({ navigation }) {
             activeOpacity={0.8}
           >
             <Edit3 color={COLORS.primaryLight} size={18} />
-            <Text style={styles.editHeaderText}>Edit</Text>
+            <Text style={styles.editHeaderText}>Edit Profile</Text>
           </TouchableOpacity>
         </View>
 
@@ -136,7 +137,7 @@ export default function ProfileScreen({ navigation }) {
           <View style={styles.avatarContainer}>
             <Image source={{ uri: avatarUri }} style={styles.avatar} />
             <TouchableOpacity
-              style={styles.avatarBadge}
+              style={[styles.avatarBadge, SHADOWS.glowCoral]}
               onPress={() => setEditModalVisible(true)}
             >
               <Edit3 color="#FFFFFF" size={14} />
@@ -145,7 +146,7 @@ export default function ProfileScreen({ navigation }) {
 
           <View style={styles.userNameRow}>
             <Text style={styles.userName}>
-              {profile?.full_name || 'Zivo User'}, {profile?.age || 25}
+              {profile?.full_name || 'Zivo Member'}, {profile?.age || 25}
             </Text>
             {profile?.is_verified && (
               <ShieldCheck color={COLORS.success} size={20} />
@@ -168,19 +169,19 @@ export default function ProfileScreen({ navigation }) {
           >
             <Coins color={COLORS.warning} size={24} />
             <Text style={styles.statValue}>{profile?.coins || 0}</Text>
-            <Text style={styles.statLabel}>Zivo Coins</Text>
+            <Text style={styles.statLabel}>Coins Wallet</Text>
           </TouchableOpacity>
 
           <View style={styles.statCard}>
-            <Sparkles color={COLORS.primary} size={24} />
+            <Sparkles color={COLORS.secondary} size={24} />
             <Text style={styles.statValue}>94%</Text>
-            <Text style={styles.statLabel}>Avg Match</Text>
+            <Text style={styles.statLabel}>Match Rate</Text>
           </View>
 
           <View style={styles.statCard}>
-            <Heart color={COLORS.secondary} size={24} fill={COLORS.secondary} />
-            <Text style={styles.statValue}>18</Text>
-            <Text style={styles.statLabel}>Likes Sent</Text>
+            <Flame color={COLORS.primary} size={24} fill={COLORS.primary} />
+            <Text style={styles.statValue}>🔥 2d</Text>
+            <Text style={styles.statLabel}>Active Streak</Text>
           </View>
         </View>
 
@@ -189,7 +190,7 @@ export default function ProfileScreen({ navigation }) {
           <Text style={styles.sectionTitle}>About Me</Text>
           <Text style={styles.bioText}>
             {profile?.bio ||
-              'No bio added yet. Tap Edit to introduce yourself with your passions, humor, or favorite activities!'}
+              'No bio added yet. Tell people what excites you, your favorite weekend routine, or music tastes!'}
           </Text>
 
           {profile?.interests && profile.interests.length > 0 && (
@@ -203,9 +204,9 @@ export default function ProfileScreen({ navigation }) {
           )}
         </View>
 
-        {/* Account Actions */}
+        {/* Preferences & Settings */}
         <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Preferences & Safety</Text>
+          <Text style={styles.sectionTitle}>Perks & Security</Text>
 
           <TouchableOpacity
             style={styles.actionRow}
@@ -213,7 +214,7 @@ export default function ProfileScreen({ navigation }) {
           >
             <View style={styles.actionRowLeft}>
               <Coins color={COLORS.warning} size={20} />
-              <Text style={styles.actionRowText}>Coin Store & Rewards</Text>
+              <Text style={styles.actionRowText}>Coin Store & Streaks</Text>
             </View>
             <Text style={styles.actionRowRight}>Recharge &gt;</Text>
           </TouchableOpacity>
@@ -226,7 +227,7 @@ export default function ProfileScreen({ navigation }) {
               <SettingsIcon color={COLORS.textMuted} size={20} />
               <Text style={styles.actionRowText}>Call Blur & Safety Filter</Text>
             </View>
-            <Text style={[styles.actionRowRight, { color: COLORS.success }]}>Active</Text>
+            <Text style={[styles.actionRowRight, { color: COLORS.success }]}>Protected</Text>
           </TouchableOpacity>
         </View>
 
@@ -237,7 +238,7 @@ export default function ProfileScreen({ navigation }) {
           activeOpacity={0.8}
         >
           <LogOut color={COLORS.danger} size={20} />
-          <Text style={styles.signOutText}>Sign Out</Text>
+          <Text style={styles.signOutText}>Log Out of Zivo</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -270,7 +271,7 @@ export default function ProfileScreen({ navigation }) {
                 placeholderTextColor={COLORS.inputPlaceholder}
               />
 
-              <Text style={styles.inputLabel}>Intent</Text>
+              <Text style={styles.inputLabel}>I'm Looking For</Text>
               <View style={styles.intentSelector}>
                 {['dating', 'friendship', 'networking'].map((item) => (
                   <TouchableOpacity
@@ -300,12 +301,12 @@ export default function ProfileScreen({ navigation }) {
                 onChangeText={setEditBio}
                 multiline
                 numberOfLines={4}
-                placeholder="Share your interests, hobbies, and what you are looking for..."
+                placeholder="Share your passions, vibe, and what makes you smile..."
                 placeholderTextColor={COLORS.inputPlaceholder}
               />
 
               <TouchableOpacity
-                style={styles.saveBtn}
+                style={[styles.saveBtn, SHADOWS.glowCoral]}
                 onPress={handleSaveProfile}
                 disabled={saving}
                 activeOpacity={0.85}
@@ -315,7 +316,7 @@ export default function ProfileScreen({ navigation }) {
                 ) : (
                   <>
                     <Check color="#FFFFFF" size={20} />
-                    <Text style={styles.saveBtnText}>Save Changes</Text>
+                    <Text style={styles.saveBtnText}>Save Profile</Text>
                   </>
                 )}
               </TouchableOpacity>
@@ -351,22 +352,22 @@ const styles = StyleSheet.create({
   editHeaderBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(139, 92, 246, 0.15)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    backgroundColor: 'rgba(255, 78, 100, 0.15)',
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 18,
     gap: 6,
     borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.3)',
+    borderColor: 'rgba(255, 78, 100, 0.35)',
   },
   editHeaderText: {
     color: COLORS.primaryLight,
-    fontWeight: '700',
+    fontWeight: '800',
     fontSize: 13,
   },
   userCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: 24,
+    borderRadius: 26,
     padding: 24,
     alignItems: 'center',
     marginBottom: 20,
@@ -382,16 +383,16 @@ const styles = StyleSheet.create({
     width: 104,
     height: 104,
     borderRadius: 52,
-    borderWidth: 3,
+    borderWidth: 3.5,
     borderColor: COLORS.primary,
   },
   avatarBadge: {
     position: 'absolute',
     bottom: 2,
     right: 2,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
@@ -409,18 +410,18 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   intentPill: {
-    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    backgroundColor: 'rgba(255, 78, 100, 0.15)',
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 14,
     marginTop: 8,
     borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.3)',
+    borderColor: 'rgba(255, 78, 100, 0.3)',
   },
   intentText: {
     color: COLORS.primaryLight,
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   statsRow: {
     flexDirection: 'row',
@@ -430,7 +431,7 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     backgroundColor: COLORS.surface,
-    borderRadius: 20,
+    borderRadius: 22,
     padding: 16,
     alignItems: 'center',
     borderWidth: 1,
@@ -439,19 +440,19 @@ const styles = StyleSheet.create({
   },
   statValue: {
     color: COLORS.textPrimary,
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: 17,
+    fontWeight: '900',
     marginTop: 6,
   },
   statLabel: {
     color: COLORS.textMuted,
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: '700',
     marginTop: 2,
   },
   sectionCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: 20,
+    borderRadius: 22,
     padding: 20,
     marginBottom: 16,
     borderWidth: 1,
@@ -477,15 +478,15 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   interestChip: {
-    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    backgroundColor: 'rgba(139, 92, 246, 0.18)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.25)',
+    borderColor: 'rgba(139, 92, 246, 0.35)',
   },
   interestChipText: {
-    color: COLORS.primaryLight,
+    color: COLORS.secondaryLight,
     fontSize: 12,
     fontWeight: '700',
   },
@@ -518,7 +519,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(239, 68, 68, 0.12)',
     paddingVertical: 16,
-    borderRadius: 20,
+    borderRadius: 22,
     marginTop: 8,
     gap: 10,
     borderWidth: 1,
@@ -542,8 +543,8 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: COLORS.surfaceElevated,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
     padding: 24,
     maxHeight: '85%',
   },
@@ -567,7 +568,7 @@ const styles = StyleSheet.create({
   },
   modalInput: {
     backgroundColor: COLORS.inputBackground,
-    borderRadius: 14,
+    borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
     color: COLORS.inputText,
@@ -588,7 +589,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     backgroundColor: COLORS.surfaceLight,
-    borderRadius: 12,
+    borderRadius: 14,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -615,11 +616,10 @@ const styles = StyleSheet.create({
     marginTop: 24,
     marginBottom: 16,
     gap: 8,
-    ...SHADOWS.glowPrimary,
   },
   saveBtnText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
   },
 });
