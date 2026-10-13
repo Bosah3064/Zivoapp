@@ -1,1 +1,39 @@
-{"expo":{"name":"zivo-dating","slug":"zivo-dating","version":"1.0.0","orientation":"portrait","icon":"./assets/icon.png","userInterfaceStyle":"dark","newArchEnabled":true,"splash":{"image":"./assets/splash.png","resizeMode":"contain","backgroundColor":"#0B0E14"},"ios":{"supportsTablet":true},"android":{"adaptiveIcon":{"foregroundImage":"./assets/adaptive-icon.png","backgroundColor":"#0B0E14"}},"web":{"favicon":"./assets/favicon.png"}}}
+{
+  "expo": {
+    "name": "Zivo",
+    "slug": "zivo-dating",
+    "scheme": "zivo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#090B10"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.zivo.dating",
+      "googleServicesFile": "./GoogleService-Info.plist"
+    },
+    "android": {
+      "package": "com.zivo.dating",
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#090B10"
+      },
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

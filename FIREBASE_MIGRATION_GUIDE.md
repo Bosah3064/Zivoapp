@@ -33,16 +33,18 @@ This guide provides step-by-step instructions for moving your users, database re
 
 ---
 
-## Step 1: Create Your Firebase Project
+## Step 1: Create Your Firebase Project & Register Apps
 
 1. Open the [Firebase Console](https://console.firebase.google.com).
 2. Click **Add project** (or *Create a project*).
 3. Name your project (e.g. `zivo-dating`).
 4. (Optional) Enable Google Analytics and click **Create Project**.
-5. Once created, click on the **Web icon (`</>`)** on the Project Overview page to register a Web App:
-   - App nickname: `Zivo App`
+
+### A. Register the Web App (Used by Admin Dashboard & Mobile Web)
+1. On the Project Overview page, click the **Web icon (`</>`)**:
+   - **App nickname**: `Zivo Web`
    - Click **Register app**.
-6. You will see a `firebaseConfig` object like this:
+2. Copy the generated `firebaseConfig` object:
    ```javascript
    const firebaseConfig = {
      apiKey: "AIzaSyB...",
@@ -53,7 +55,39 @@ This guide provides step-by-step instructions for moving your users, database re
      appId: "1:123456789:web:abcdef..."
    };
    ```
-   **Copy these values** — you will paste them into `frontend/src/lib/firebase.js` and `admin/src/lib/firebase.js`.
+   Paste these credentials into [`frontend/src/lib/firebase.js`](frontend/src/lib/firebase.js) and [`admin/src/lib/firebase.js`](admin/src/lib/firebase.js).
+
+---
+
+### B. Register the Android App (For Mobile App Builds)
+1. In Firebase Console, click **Add app** (or the **Android icon 🤖**):
+2. Fill in the exact Android fields:
+   - **Android package name**: `com.zivo.dating`
+   - **App nickname**: `Zivo Android`
+   - **Debug signing certificate SHA-1** (Optional, required for Google Sign-In):
+     * Run this command to generate your local debug SHA-1:
+       ```bash
+       keytool -list -v -keystore "%USERPROFILE%\.android\debug.keystore" -alias androiddebugkey -storepass android -keypass android
+       ```
+     * Or if using EAS Build: run `npx eas credentials`
+3. Click **Register app**.
+4. Download **`google-services.json`** and place it in the `frontend/` folder:
+   ```
+   frontend/google-services.json
+   ```
+
+---
+
+### C. Register the iOS App (For Apple Builds)
+1. In Firebase Console, click **Add app** (or the **Apple icon 🍏**):
+2. Fill in the exact iOS fields:
+   - **Apple bundle ID**: `com.zivo.dating`
+   - **App nickname**: `Zivo iOS`
+3. Click **Register app**.
+4. Download **`GoogleService-Info.plist`** and place it in the `frontend/` folder:
+   ```
+   frontend/GoogleService-Info.plist
+   ```
 
 ---
 
